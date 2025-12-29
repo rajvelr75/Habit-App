@@ -6,12 +6,51 @@ import { db } from "../firebase";
 import { encryptData, decryptData } from "../utils/crypto";
 import { format } from "date-fns";
 import { Avatar } from "../components/ui/Avatar";
-import { Save, User, Upload, Image as ImageIcon, Pencil, LogOut } from "lucide-react";
+import { Save, User, Upload, Image as ImageIcon, Pencil, LogOut, Shield, Star, Hexagon } from "lucide-react";
 
 import { checkAndGrantMonthlyBadge, getUserBadges } from "../services/db";
 import { Award } from "lucide-react";
 
-// ... inside Profile component
+const getBadgeTheme = (dateId) => {
+    // dateId format: "YYYY-MM"
+    const month = parseInt(dateId.split('-')[1]);
+
+    // Minimalist Token Theme (Matte Black + Neon Border)
+    const base = {
+        bg: "bg-zinc-900",
+        text: "text-zinc-100",
+        subtext: "text-zinc-500"
+    };
+
+    switch (month) {
+        case 1: // Jan - Red
+            return { ...base, border: "border-red-500", color: "text-red-500" };
+        case 2: // Feb - Purple
+            return { ...base, border: "border-purple-500", color: "text-purple-500" };
+        case 3: // Mar - Cyan
+            return { ...base, border: "border-cyan-500", color: "text-cyan-500" };
+        case 4: // Apr - White
+            return { ...base, border: "border-zinc-200", color: "text-zinc-200" };
+        case 5: // May - Emerald
+            return { ...base, border: "border-emerald-500", color: "text-emerald-500" };
+        case 6: // Jun - Orange
+            return { ...base, border: "border-orange-400", color: "text-orange-400" };
+        case 7: // Jul - Rose
+            return { ...base, border: "border-rose-500", color: "text-rose-500" };
+        case 8: // Aug - Lime
+            return { ...base, border: "border-lime-500", color: "text-lime-500" };
+        case 9: // Sep - Blue
+            return { ...base, border: "border-blue-500", color: "text-blue-500" };
+        case 10: // Oct - Pink
+            return { ...base, border: "border-pink-500", color: "text-pink-500" };
+        case 11: // Nov - Yellow
+            return { ...base, border: "border-yellow-500", color: "text-yellow-500" };
+        case 12: // Dec - Indigo
+            return { ...base, border: "border-indigo-500", color: "text-indigo-500" };
+        default:
+            return { ...base, border: "border-zinc-600", color: "text-zinc-400" };
+    }
+};
 
 export default function Profile() {
     const { currentUser, logout } = useAuth();
@@ -26,10 +65,7 @@ export default function Profile() {
     useEffect(() => {
         if (currentUser) {
             setDisplayName(currentUser.displayName || "");
-            // Initial load handled by AuthContext usually, but for immediate feedback:
             fetchProfileImage();
-
-            // Check for badges and load
             checkAndGrantMonthlyBadge(currentUser.uid).then(() => {
                 loadBadges();
             });
@@ -38,11 +74,8 @@ export default function Profile() {
 
     const loadBadges = async () => {
         const userBadges = await getUserBadges(currentUser.uid);
-        // Sort by date descending
         setBadges(userBadges.sort((a, b) => b.id.localeCompare(a.id)));
     };
-
-    // ... render logic
 
     const fetchProfileImage = async () => {
         try {
@@ -59,7 +92,6 @@ export default function Profile() {
         }
     };
 
-
     const handleSave = async (e) => {
         e.preventDefault();
         setError("");
@@ -67,21 +99,14 @@ export default function Profile() {
         setLoading(true);
 
         try {
-            // 1. Update Standard Profile (Display Name)
-            await updateProfile(currentUser, {
-                displayName: displayName
-            });
-
-            // 2. Encrypt and Store Photo in Firestore (if changed)
+            await updateProfile(currentUser, { displayName: displayName });
             if (photoPreview && photoPreview.startsWith("data:image")) {
                 const encrypted = encryptData(photoPreview);
-                // Write to Firestore: users/{uid}
                 await setDoc(doc(db, "users", currentUser.uid), {
                     encryptedPhoto: encrypted,
                     updatedAt: new Date().toISOString()
                 }, { merge: true });
             }
-
             setMessage("Profile updated & Image encrypted successfully!");
         } catch (err) {
             console.error(err);
@@ -103,7 +128,6 @@ export default function Profile() {
                         ) : (
                             <Avatar user={{ displayName, photoURL: null }} className="h-full w-full text-4xl" />
                         )}
-                        {/* Overlay hint */}
                         <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                             <ImageIcon className="text-white" />
                         </div>
@@ -112,7 +136,6 @@ export default function Profile() {
                 </div>
 
                 <form onSubmit={handleSave} className="space-y-6">
-                    {/* Name Input */}
                     <div>
                         <label className="block text-sm font-medium text-gray-400 mb-2">Display Name</label>
                         <div className="flex items-center gap-3">
@@ -135,8 +158,6 @@ export default function Profile() {
                                     {displayName || "User"}
                                 </div>
                             )}
-
-                            {/* Toggle Button */}
                             <button
                                 type="button"
                                 onClick={() => setIsEditingName(!isEditingName)}
@@ -146,10 +167,8 @@ export default function Profile() {
                             </button>
                         </div>
                     </div>
-
                     {error && <div className="p-3 bg-red-500/20 text-red-200 rounded-lg text-sm">{error}</div>}
                     {message && <div className="p-3 bg-green-500/20 text-green-200 rounded-lg text-sm">{message}</div>}
-
                     {isEditingName && (
                         <button
                             type="submit"
@@ -162,7 +181,6 @@ export default function Profile() {
                     )}
                 </form>
 
-                {/* Logout Button */}
                 <div className="mt-8 border-t border-white/10 pt-6">
                     <button
                         onClick={() => logout()}
@@ -174,50 +192,52 @@ export default function Profile() {
                 </div>
             </div>
 
-            {/* Badges Section */}
             <div className="mt-8">
                 <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                    <Award className="text-yellow-500" /> Badges
+                    <Shield className="text-zinc-500" /> Medals
                 </h2>
                 {badges.length > 0 ? (
-                    <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                    <div className="grid grid-cols-3 xs:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-6">
                         {badges.map(badge => (
-                            <div key={badge.id} className="group relative aspect-square perspective-1000">
-                                {/* Card Container */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-black border border-yellow-500/20 rounded-xl shadow-lg flex flex-col items-center justify-center transition-all duration-300 group-hover:scale-105 group-hover:border-yellow-500/50 group-hover:shadow-yellow-500/20 overflow-hidden">
+                            <div key={badge.id} className="group relative w-full aspect-square">
+                                {(() => {
+                                    const theme = getBadgeTheme(badge.id);
+                                    return (
+                                        <div className={`
+                                            relative h-full w-full rounded-2xl
+                                            ${theme.bg} border-2 ${theme.border}
+                                            flex flex-col items-center justify-center
+                                            transition-all duration-300
+                                            group-hover:scale-105 group-hover:shadow-lg
+                                            cursor-default
+                                        `}>
 
-                                    {/* Subtle Texture - Increased Opacity */}
-                                    <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] mix-blend-overlay pointer-events-none"></div>
+                                            {/* Minimalist Icon */}
+                                            <div className={`mb-2 ${theme.color}`}>
+                                                <Hexagon size={24} strokeWidth={2} className="fill-current bg-opacity-20" />
+                                            </div>
 
-                                    {/* Inner decorative line */}
-                                    <div className="absolute inset-1.5 border border-white/10 rounded-lg pointer-events-none group-hover:border-yellow-500/30 transition-colors"></div>
+                                            {/* Month Name */}
+                                            <div className={`text-xs font-bold tracking-widest uppercase ${theme.text}`}>
+                                                {format(new Date(badge.id + "-02"), "MMM")}
+                                            </div>
 
-                                    {/* Icon Top */}
-                                    {/* <div className="mb-1 relative z-10">
-                                        <Award size={14} className="text-yellow-700 group-hover:text-yellow-400 transition-colors duration-500" />
-                                    </div> */}
+                                            {/* Year */}
+                                            <div className={`text-[10px] mt-1 ${theme.subtext}`}>
+                                                {format(new Date(badge.id + "-02"), "yyyy")}
+                                            </div>
 
-                                    {/* Month Big */}
-                                    <span className="relative z-10 text-xl md:text-2xl font-serif font-black text-transparent bg-clip-text bg-gradient-to-t from-yellow-600 via-yellow-300 to-yellow-100 tracking-wider shadow-sm">
-                                        {format(new Date(badge.id + "-02"), "MMM").toUpperCase()}
-                                    </span>
-
-                                    {/* Year Small */}
-                                    <span className="relative z-10 text-[10px] font-mono text-zinc-600 group-hover:text-yellow-600/80 transition-colors mt-1">
-                                        {format(new Date(badge.id + "-02"), "yyyy")}
-                                    </span>
-
-                                    {/* Shine effect on hover */}
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none transform -skew-x-12 translate-x-full group-hover:translate-x-0"></div>
-                                </div>
+                                        </div>
+                                    );
+                                })()}
                             </div>
                         ))}
                     </div>
                 ) : (
                     <div className="bg-white/5 border border-white/5 rounded-xl p-8 text-center text-gray-500">
                         <Award size={32} className="mx-auto mb-3 opacity-20" />
-                        <p>No badges yet.</p>
-                        <p className="text-xs mt-1">Complete a perfect month to earn one.</p>
+                        <p>No medals yet.</p>
+                        <p className="text-xs mt-1">Keep your streak alive.</p>
                     </div>
                 )}
             </div>

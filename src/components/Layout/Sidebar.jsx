@@ -1,11 +1,12 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, CheckSquare, BarChart2, User, Menu, X } from "lucide-react";
+import { LayoutDashboard, CheckSquare, BarChart2, User, Menu, X, Flame } from "lucide-react";
 import clsx from "clsx";
 import { useState } from "react";
 
 const NAVIGATION = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Tasks", href: "/tasks", icon: CheckSquare },
+    { name: "Streak", href: "/streak", icon: Flame },
     { name: "Analytics", href: "/analytics", icon: BarChart2 },
     { name: "Profile", href: "/profile", icon: User },
 ];

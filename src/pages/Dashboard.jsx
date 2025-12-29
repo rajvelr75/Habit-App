@@ -101,14 +101,27 @@ export default function Dashboard() {
                 {/* Metric Cards */}
                 <div className="flex gap-4 w-full md:w-auto">
                     {/* Streak Card */}
+                    {/* Streak Card - Redesigned to be a Badge/Medal */}
                     {maxStreak > 0 && (
-                        <div className="bg-orange-500/10 border border-orange-500/20 px-4 py-3 rounded-xl flex items-center gap-3 flex-1 md:flex-none">
-                            <div className="bg-orange-500/20 p-2 rounded-lg text-orange-500">
-                                <Flame size={20} fill="currentColor" />
-                            </div>
-                            <div>
-                                <p className="text-xs text-orange-200 font-medium uppercase tracking-wider">Top Streak</p>
-                                <p className="font-bold text-orange-100">{maxStreakTask} <span className="text-orange-300 mx-1">•</span> {maxStreak} days</p>
+                        <div className="relative group">
+                            <div className="absolute inset-0 bg-orange-500/30 blur-xl rounded-full opacity-50 group-hover:opacity-75 transition-opacity duration-500"></div>
+                            <div className="relative bg-gradient-to-b from-slate-800 to-black border border-orange-500/50 p-2 rounded-2xl shadow-2xl flex items-center gap-4 pr-6 hover:translate-y-[-2px] transition-transform duration-300">
+                                {/* Icon Container (Medal) */}
+                                <div className="bg-gradient-to-br from-orange-400 to-red-600 w-14 h-14 rounded-xl flex items-center justify-center shadow-lg border border-white/10 shrink-0 transform rotate-3 group-hover:rotate-6 transition-transform">
+                                    <Flame size={28} className="text-white drop-shadow-md animate-pulse" fill="currentColor" />
+                                </div>
+
+                                {/* Text Content */}
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] font-bold text-orange-400 uppercase tracking-widest leading-none mb-1">Top Streak</span>
+                                    <div className="flex items-baseline gap-1.5">
+                                        <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-orange-200 font-mono tracking-tight">
+                                            {maxStreak}
+                                        </span>
+                                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Days</span>
+                                    </div>
+                                    <p className="text-[10px] text-gray-400 truncate max-w-[80px]">{maxStreakTask}</p>
+                                </div>
                             </div>
                         </div>
                     )}

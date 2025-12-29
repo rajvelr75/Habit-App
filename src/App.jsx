@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Tasks from './pages/Tasks';
 import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
+import Streak from './pages/Streak';
 import ProtectedLayout from './components/Layout/ProtectedLayout';
 import InstallPWA from './components/ui/InstallPWA'; // Import InstallPWA
 
@@ -19,6 +20,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/analytics" element={<Analytics />} />
+            <Route path="/streak" element={<Streak />} />
             <Route path="/profile" element={<Profile />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
